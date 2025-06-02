@@ -62,14 +62,18 @@ class CoinGeckoConfig:
         Raises:
             ConfigurationError: If timeout is invalid
         """
-        # If no timeout provided, use default from environment or static default
+        # Check for None or unsupported types first
         if timeout is None:
-            timeout = os.getenv('COINGECKO_API_TIMEOUT', 10)
+            return int(os.getenv('COINGECKO_API_TIMEOUT', 10))
 
-        # Convert to string to handle different input types safely
+        # Check for invalid types
+        if not isinstance(timeout, (int, float, str)):
+            raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
+
+        # Convert to string and strip
         timeout_str = str(timeout).strip()
 
-        # Check for empty or blank strings
+        # Check for empty strings
         if not timeout_str:
             raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
 
@@ -79,7 +83,6 @@ class CoinGeckoConfig:
             
             # Additional checks
             if (
-                not isinstance(timeout_value, (int, float)) or  # Not a number
                 math.isnan(timeout_value) or  # Not a number (NaN)
                 math.isinf(timeout_value) or  # Infinity
                 timeout_value <= 0  # Non-positive number
