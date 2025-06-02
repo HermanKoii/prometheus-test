@@ -37,10 +37,25 @@ def test_manual_override_configuration():
     assert cfg['timeout'] == 15
     assert cfg['api_key'] is not None
 
-def test_invalid_timeout():
-    """Test handling of invalid timeout."""
-    with pytest.raises(ConfigurationError):
-        CoinGeckoConfig(timeout='invalid')
+def test_invalid_timeout_cases():
+    """Test handling of various invalid timeout scenarios."""
+    invalid_cases = [
+        'invalid',
+        '  ',
+        [],
+        {},
+        None
+    ]
+
+    for case in invalid_cases:
+        with pytest.raises(ConfigurationError, match="Invalid timeout value"):
+            CoinGeckoConfig(timeout=case)
+
+def test_float_timeout_conversion():
+    """Test that float timeouts are converted to integers."""
+    config = CoinGeckoConfig(timeout=15.7)
+    cfg = config.get_config()
+    assert cfg['timeout'] == 15
 
 def test_from_dict_configuration():
     """Test configuration from dictionary."""
