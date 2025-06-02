@@ -40,11 +40,16 @@ def test_manual_override_configuration():
 def test_invalid_timeout_cases():
     """Test handling of various invalid timeout scenarios."""
     invalid_cases = [
-        'invalid',
-        '  ',
-        [],
-        {},
-        None
+        '',         # Empty string
+        '   ',      # Whitespace
+        'invalid',  # Non-numeric string
+        '-10',      # Negative number
+        '0',        # Zero
+        [],         # List
+        {},         # Dictionary
+        None,       # None
+        float('nan'),  # Not a number
+        float('inf')   # Infinity
     ]
 
     for case in invalid_cases:
