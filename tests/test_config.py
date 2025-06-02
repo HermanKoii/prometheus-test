@@ -1,4 +1,5 @@
 import os
+import math
 import pytest
 from src.config import CoinGeckoConfig, ConfigurationError
 
@@ -45,14 +46,24 @@ def test_invalid_timeout_cases():
         'invalid',  # Non-numeric string
         '-10',      # Negative number
         '0',        # Zero
-        [],         # List
-        {},         # Dictionary
-        None,       # None
         float('nan'),  # Not a number
         float('inf')   # Infinity
     ]
 
+    # Test for invalid types separately
+    type_cases = [
+        [],         # List
+        {},         # Dictionary
+        None        # None
+    ]
+
+    # Test numeric string invalid cases
     for case in invalid_cases:
+        with pytest.raises(ConfigurationError, match="Invalid timeout value"):
+            CoinGeckoConfig(timeout=case)
+
+    # Test type-based cases
+    for case in type_cases:
         with pytest.raises(ConfigurationError, match="Invalid timeout value"):
             CoinGeckoConfig(timeout=case)
 
