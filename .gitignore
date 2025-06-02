@@ -1,48 +1,34 @@
-.venv
+# Environment files
 .env
-__pycache__
-.pytest_cache
-.pypirc
-*.db
-test
-test_state.json
-task_flow.egg-info
-example_repo
-signature.js
-git-filter-repo
-task/orca/
-**/dist/
-# yarn.lock
-package-lock.json
-node_modules
-build
-migrate.sh
-*/dev.js
-executables/*
-namespace/*
-config/*
+*.env
 .env.local
-taskStateInfoKeypair.json
-localKOIIDB.db
-metadata.json
-.npmrc
-*.pem
-.vscode
-.cursor
-data/chunks
-data/process
-test_state.csv
-todos-example.csv
 
+# Python-related
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Ignore auto-generated repository directories
-repos/
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
 
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
 
-# Ignore Data
-data/*
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
 
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
 
-venv
-
-**/venv/
+# Miscellaneous
+.DS_Store
