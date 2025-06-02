@@ -1,4 +1,5 @@
 import os
+import math
 from typing import Dict, Any, Optional, Union
 from dotenv import load_dotenv
 
@@ -65,14 +66,25 @@ class CoinGeckoConfig:
         if timeout is None:
             timeout = os.getenv('COINGECKO_API_TIMEOUT', 10)
 
-        # Handle different input types
+        # Convert to string to handle different input types safely
+        timeout_str = str(timeout).strip()
+
+        # Check for empty or blank strings
+        if not timeout_str:
+            raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
+
         try:
-            # Try converting to float first (to handle both int and float)
-            timeout_value = float(str(timeout).strip())
+            # Try converting to float
+            timeout_value = float(timeout_str)
             
-            # Check for non-numeric or negative values
-            if not isinstance(timeout_value, (int, float)) or timeout_value <= 0:
-                raise ValueError("Timeout must be a positive number")
+            # Additional checks
+            if (
+                not isinstance(timeout_value, (int, float)) or  # Not a number
+                math.isnan(timeout_value) or  # Not a number (NaN)
+                math.isinf(timeout_value) or  # Infinity
+                timeout_value <= 0  # Non-positive number
+            ):
+                raise ValueError("Invalid timeout")
             
             return int(timeout_value)
         except (ValueError, TypeError):
