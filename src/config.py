@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 from dotenv import load_dotenv
 
 class ConfigurationError(Exception):
@@ -20,7 +20,7 @@ class CoinGeckoConfig:
         self, 
         base_url: Optional[str] = None, 
         api_key: Optional[str] = None,
-        timeout: Optional[int] = None
+        timeout: Optional[Union[int, float, str]] = None
     ):
         """
         Initialize configuration with optional overrides.
@@ -45,19 +45,38 @@ class CoinGeckoConfig:
         # Configure API key (optional)
         self.api_key = api_key or os.getenv('COINGECKO_API_KEY')
 
-        # Configure timeout
+        # Configure timeout with robust validation
+        self.timeout = self._validate_timeout(timeout)
+
+    def _validate_timeout(self, timeout: Optional[Union[int, float, str]]) -> int:
+        """
+        Validate and convert timeout to integer.
+
+        Args:
+            timeout: Timeout value to validate
+
+        Returns:
+            Validated timeout as integer
+
+        Raises:
+            ConfigurationError: If timeout is invalid
+        """
+        # If no timeout provided, use default from environment or static default
+        if timeout is None:
+            timeout = os.getenv('COINGECKO_API_TIMEOUT', 10)
+
+        # Handle different input types
         try:
-            # First try to convert timeout parameter
-            if timeout is not None:
-                if not isinstance(timeout, (int, float)):
-                    raise ValueError("Timeout must be a number")
-                self.timeout = int(timeout)
-            else:
-                # Then try environment variable
-                timeout_str = os.getenv('COINGECKO_API_TIMEOUT', '10')
-                self.timeout = int(timeout_str)
+            # Try converting to float first (to handle both int and float)
+            timeout_value = float(str(timeout).strip())
+            
+            # Check for non-numeric or negative values
+            if not isinstance(timeout_value, (int, float)) or timeout_value <= 0:
+                raise ValueError("Timeout must be a positive number")
+            
+            return int(timeout_value)
         except (ValueError, TypeError):
-            raise ConfigurationError("Invalid timeout value. Must be a valid integer.")
+            raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
 
     def get_config(self) -> Dict[str, Any]:
         """
