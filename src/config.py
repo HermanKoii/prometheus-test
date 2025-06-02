@@ -62,36 +62,40 @@ class CoinGeckoConfig:
         Raises:
             ConfigurationError: If timeout is invalid
         """
-        # Check for None or unsupported types first
+        # Explicit type checking
         if timeout is None:
             return int(os.getenv('COINGECKO_API_TIMEOUT', 10))
 
-        # Check for invalid types
-        if not isinstance(timeout, (int, float, str)):
-            raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
+        # Handle primitive types directly
+        if isinstance(timeout, int):
+            if timeout <= 0:
+                raise ConfigurationError("Invalid timeout value. Must be a positive number.")
+            return timeout
 
-        # Convert to string and strip
-        timeout_str = str(timeout).strip()
+        if isinstance(timeout, float):
+            if timeout <= 0 or math.isnan(timeout) or math.isinf(timeout):
+                raise ConfigurationError("Invalid timeout value. Must be a positive number.")
+            return int(timeout)
 
-        # Check for empty strings
-        if not timeout_str:
-            raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
+        # For string types
+        if isinstance(timeout, str):
+            # Strip whitespace
+            timeout_str = timeout.strip()
 
-        try:
-            # Try converting to float
-            timeout_value = float(timeout_str)
-            
-            # Additional checks
-            if (
-                math.isnan(timeout_value) or  # Not a number (NaN)
-                math.isinf(timeout_value) or  # Infinity
-                timeout_value <= 0  # Non-positive number
-            ):
-                raise ValueError("Invalid timeout")
-            
-            return int(timeout_value)
-        except (ValueError, TypeError):
-            raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
+            # Check for empty string
+            if not timeout_str:
+                raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
+
+            try:
+                timeout_value = float(timeout_str)
+                if timeout_value <= 0 or math.isnan(timeout_value) or math.isinf(timeout_value):
+                    raise ValueError("Invalid timeout")
+                return int(timeout_value)
+            except (ValueError, TypeError):
+                raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
+
+        # Catch-all for unsupported types
+        raise ConfigurationError("Invalid timeout value. Must be a valid positive number.")
 
     def get_config(self) -> Dict[str, Any]:
         """
