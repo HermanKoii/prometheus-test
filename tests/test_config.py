@@ -40,7 +40,8 @@ def test_manual_override_configuration():
 
 def test_invalid_timeout_cases():
     """Test handling of various invalid timeout scenarios."""
-    invalid_cases = [
+    # Numeric invalid cases
+    numeric_invalid_cases = [
         '',         # Empty string
         '   ',      # Whitespace
         'invalid',  # Non-numeric string
@@ -50,20 +51,20 @@ def test_invalid_timeout_cases():
         float('inf')   # Infinity
     ]
 
-    # Test for invalid types separately
-    type_cases = [
+    # Type-based invalid cases
+    type_invalid_cases = [
         [],         # List
         {},         # Dictionary
-        None        # None
+        object(),   # Generic object
     ]
 
     # Test numeric string invalid cases
-    for case in invalid_cases:
+    for case in numeric_invalid_cases:
         with pytest.raises(ConfigurationError, match="Invalid timeout value"):
             CoinGeckoConfig(timeout=case)
 
     # Test type-based cases
-    for case in type_cases:
+    for case in type_invalid_cases:
         with pytest.raises(ConfigurationError, match="Invalid timeout value"):
             CoinGeckoConfig(timeout=case)
 
