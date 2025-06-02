@@ -29,6 +29,9 @@ class CoinGeckoConfig:
             base_url: Override for CoinGecko API base URL
             api_key: Override for CoinGecko API key
             timeout: Override for API request timeout
+        
+        Raises:
+            ConfigurationError: If timeout is not a valid integer
         """
         # Load .env file first (if exists)
         load_dotenv()
@@ -44,9 +47,17 @@ class CoinGeckoConfig:
 
         # Configure timeout
         try:
-            self.timeout = timeout or int(os.getenv('COINGECKO_API_TIMEOUT', 10))
-        except ValueError:
-            raise ConfigurationError("Invalid timeout value. Must be an integer.")
+            # First try to convert timeout parameter
+            if timeout is not None:
+                if not isinstance(timeout, (int, float)):
+                    raise ValueError("Timeout must be a number")
+                self.timeout = int(timeout)
+            else:
+                # Then try environment variable
+                timeout_str = os.getenv('COINGECKO_API_TIMEOUT', '10')
+                self.timeout = int(timeout_str)
+        except (ValueError, TypeError):
+            raise ConfigurationError("Invalid timeout value. Must be a valid integer.")
 
     def get_config(self) -> Dict[str, Any]:
         """
