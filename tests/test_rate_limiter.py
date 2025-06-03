@@ -5,7 +5,7 @@ from src.exceptions import RateLimitError, NetworkError
 
 def test_rate_limiter_basic():
     """Test basic rate limiter functionality."""
-    limiter = RateLimiter(max_calls=2, period=1.0)
+    limiter = RateLimiter(max_calls=2, period=1.0, raise_on_limit=True)
     
     @limiter
     def dummy_func():
@@ -18,6 +18,22 @@ def test_rate_limiter_basic():
     # Third call should trigger rate limit
     with pytest.raises(RateLimitError):
         dummy_func()
+
+def test_rate_limiter_wait_mode():
+    """Test rate limiter in wait mode."""
+    limiter = RateLimiter(max_calls=2, period=1.0, raise_on_limit=False)
+    
+    @limiter
+    def dummy_func():
+        return True
+    
+    start_time = time.time()
+    assert dummy_func() is True
+    assert dummy_func() is True
+    assert dummy_func() is True
+    
+    # Ensure some waiting occurred
+    assert time.time() - start_time > 1.0
 
 def test_retry_decorator():
     """Test retry decorator with mock failures."""
