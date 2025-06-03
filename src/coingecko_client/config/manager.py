@@ -78,7 +78,7 @@ class ConfigurationManager:
             InvalidConfigurationError: If configuration is invalid
         """
         # Validate base URL
-        if not self._config.get('base_url'):
+        if not self._config.get('base_url') or self._config.get('base_url') == '':
             raise MissingConfigurationError('base_url')
 
         # Validate timeout
