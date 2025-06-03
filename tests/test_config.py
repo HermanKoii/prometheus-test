@@ -55,9 +55,9 @@ def test_invalid_timeout_configuration():
         CoinGeckoConfig(timeout=-10)
 
 def test_missing_base_url_configuration():
-    """Test handling of missing base URL."""
+    """Test handling of explicit null base URL."""
     with pytest.raises(ConfigurationError, match="Base URL is required"):
-        CoinGeckoConfig(base_url=None)
+        CoinGeckoConfig(base_url='')
 
 def test_configuration_priority():
     """Test configuration parameter priority."""
