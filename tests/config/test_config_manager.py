@@ -61,4 +61,4 @@ def test_config_manager_invalid_timeout():
 def test_config_manager_missing_base_url():
     """Test missing base URL."""
     with pytest.raises(MissingConfigurationError, match="base_url"):
-        ConfigurationManager(override_config={'base_url': None})
+        ConfigurationManager(override_config={'base_url': ''})
