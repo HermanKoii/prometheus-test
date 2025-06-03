@@ -21,6 +21,7 @@ class CoinGeckoConfig:
     """
     
     DEFAULT_CONFIG_FILE = 'config.json'
+    DEFAULT_BASE_URL = 'https://api.coingecko.com/api/v3'
     
     def __init__(
         self, 
@@ -65,7 +66,7 @@ class CoinGeckoConfig:
         """
         config = {
             'api_key': os.getenv('COINGECKO_API_KEY'),
-            'base_url': os.getenv('COINGECKO_BASE_URL', 'https://api.coingecko.com/api/v3'),
+            'base_url': os.getenv('COINGECKO_BASE_URL', self.DEFAULT_BASE_URL),
             'timeout': int(os.getenv('COINGECKO_TIMEOUT', 30))
         }
         
@@ -104,6 +105,9 @@ class CoinGeckoConfig:
         """
         if not config.get('base_url'):
             raise ConfigurationError("Base URL is required")
+        
+        if not isinstance(config.get('base_url'), str):
+            raise ConfigurationError("Base URL must be a string")
         
         try:
             timeout = int(config.get('timeout', 30))
