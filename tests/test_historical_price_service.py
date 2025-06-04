@@ -81,7 +81,7 @@ def test_network_timeout(mock_get, historical_price_service):
     """Test handling of network timeout errors."""
     mock_get.side_effect = requests.exceptions.Timeout("Connection timed out")
 
-    with pytest.raises(NetworkError, match="Network error"):
+    with pytest.raises(NetworkError, match="Request timed out"):
         historical_price_service.get_historical_price(
             coin_id='bitcoin', 
             date='01-01-2023'
