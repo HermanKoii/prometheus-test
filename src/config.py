@@ -20,21 +20,20 @@ class CoinGeckoConfig:
     
     def __init__(self, 
                  api_key: Optional[str] = None, 
-                 base_url: Optional[str] = None,
+                 base_url: Optional[str] = DEFAULT_BASE_URL,
                  env_file: Optional[str] = None):
         """
         Initialize CoinGecko configuration.
         
         Args:
             api_key: Optional API key for CoinGecko
-            base_url: Optional base URL for API requests
+            base_url: Optional base URL for API requests (default from class attribute)
             env_file: Optional path to .env file (defaults to .env in project root)
         """
         # Load environment variables from .env file if specified or default
         load_dotenv(dotenv_path=env_file or '.env')
         
         # Validate base_url
-        base_url = base_url or os.getenv('COINGECKO_BASE_URL') or self.DEFAULT_BASE_URL
         self.base_url = self._validate_base_url(base_url)
         
         # Prioritize method order: 
