@@ -20,7 +20,7 @@ class CoinGeckoConfig:
     
     def __init__(self, 
                  api_key: Optional[str] = None, 
-                 base_url: Union[str, None, int] = None,
+                 base_url: Optional[str] = None,
                  env_file: Optional[str] = None):
         """
         Initialize CoinGecko configuration.
@@ -33,12 +33,17 @@ class CoinGeckoConfig:
         # Load environment variables from .env file if specified or default
         load_dotenv(dotenv_path=env_file or '.env')
         
-        # Validate base_url
-        if base_url is None:
-            base_url = os.getenv('COINGECKO_BASE_URL', self.DEFAULT_BASE_URL)
-        
-        # Always validate base_url, even when using default
-        self.base_url = self._validate_base_url(base_url)
+        # Always try to validate base_url
+        try:
+            # Use environment variable if no explicit base_url is provided
+            if base_url is None:
+                base_url = os.getenv('COINGECKO_BASE_URL', self.DEFAULT_BASE_URL)
+            
+            # Validate base_url
+            self.base_url = self._validate_base_url(base_url)
+        except ConfigurationError:
+            # If validation fails with None/empty/bad input, use default and validate
+            self.base_url = self._validate_base_url(self.DEFAULT_BASE_URL)
         
         # Prioritize method order: 
         # 1. Programmatic configuration 
@@ -58,7 +63,7 @@ class CoinGeckoConfig:
         Raises:
             ConfigurationError: If base URL is invalid
         """
-        # Handle None
+        # Explicit type and None check
         if base_url is None:
             raise ConfigurationError("Base URL must be a non-empty string")
         
