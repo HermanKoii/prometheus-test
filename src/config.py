@@ -31,15 +31,15 @@ class CoinGeckoConfig:
         # Load environment variables from .env file if specified or default
         load_dotenv(dotenv_path=env_file or '.env')
         
+        # Validate base_url first
+        self.base_url = self._validate_base_url(base_url or os.getenv('COINGECKO_BASE_URL', 'https://api.coingecko.com/api/v3'))
+        
         # Prioritize method order: 
         # 1. Programmatic configuration 
         # 2. Environment variables
         self.api_key = api_key or os.getenv('COINGECKO_API_KEY')
-        
-        # Use a specific method to validate base_url
-        self.base_url = self._validate_base_url(base_url or os.getenv('COINGECKO_BASE_URL', 'https://api.coingecko.com/api/v3'))
     
-    def _validate_base_url(self, base_url: Union[str, None, int]) -> str:
+    def _validate_base_url(self, base_url: Optional[Union[str, int]]) -> str:
         """
         Validate and return a valid base URL.
         
@@ -52,20 +52,22 @@ class CoinGeckoConfig:
         Raises:
             ConfigurationError: If base URL is invalid
         """
-        # First check type
-        if base_url is None or not isinstance(base_url, str):
+        # Type check
+        if base_url is None:
             raise ConfigurationError("Base URL must be a non-empty string")
         
-        # Then check content
-        base_url = base_url.strip()
-        if not base_url:
+        # Convert to string
+        base_url_str = str(base_url).strip()
+        
+        # Empty string check
+        if not base_url_str:
             raise ConfigurationError("Base URL must be a non-empty string")
         
-        # Validate protocol
-        if not base_url.startswith(('http://', 'https://')):
+        # Protocol check
+        if not base_url_str.startswith(('http://', 'https://')):
             raise ConfigurationError("Base URL must start with http:// or https://")
         
-        return base_url
+        return base_url_str
     
     def get_config(self) -> Dict[str, Any]:
         """
