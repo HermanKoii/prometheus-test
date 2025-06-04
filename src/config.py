@@ -1,71 +1,69 @@
 import os
-from typing import Optional, Dict, Any, Union
+from typing import Dict, Any, Optional, Union
 from dotenv import load_dotenv
 
 class ConfigurationError(Exception):
-    """Exception raised for configuration-related errors."""
+    """Custom exception for configuration errors."""
     pass
 
 class CoinGeckoConfig:
     """
-    Manages configuration for CoinGecko API integration.
+    Configuration management for CoinGecko API integration.
     
-    Supports configuration via:
-    1. Programmatic configuration
-    2. Environment variables
-    3. Default configuration
+    Supports loading configuration from:
+    1. Environment variables
+    2. .env files
+    3. Programmatic configuration
     """
     
-    DEFAULT_BASE_URL = 'https://api.coingecko.com/api/v3'
-    
-    def __init__(self, 
-                 api_key: Optional[str] = None, 
-                 base_url: Optional[str] = None,
-                 env_file: Optional[str] = None):
+    def __init__(
+        self, 
+        api_key: Optional[str] = None, 
+        base_url: Optional[str] = None, 
+        env_file: Optional[str] = '.env'
+    ):
         """
         Initialize CoinGecko configuration.
-        
+
         Args:
             api_key: Optional API key for CoinGecko
             base_url: Optional base URL for API requests
             env_file: Optional path to .env file (defaults to .env in project root)
-        
+
         Raises:
             ValueError: If no base URL is provided
         """
         # Load environment variables from .env file if specified or default
-        load_dotenv(dotenv_path=env_file or '.env')
+        if env_file:
+            load_dotenv(dotenv_path=env_file)
         
         # Validate base_url
         env_base_url = os.getenv('COINGECKO_BASE_URL')
         
-        # Enforce base URL requirement
-        if base_url is None and env_base_url is None:
-            raise ValueError("base URL is required")
+        # Set base URL with precedence: constructor > env > default
+        if base_url is None:
+            base_url = env_base_url or 'https://api.coingecko.com/api/v3'
         
-        # Choose base_url
-        if base_url is not None:
-            self.base_url = self._validate_base_url(base_url)
-        elif env_base_url is not None:
-            self.base_url = self._validate_base_url(env_base_url)
-        else:
-            self.base_url = self.DEFAULT_BASE_URL
+        # Validate and set base URL
+        self.base_url = self._validate_base_url(base_url)
         
-        # Prioritize method order: 
-        # 1. Programmatic configuration 
-        # 2. Environment variables
+        # Set API key from constructor or environment
         self.api_key = api_key or os.getenv('COINGECKO_API_KEY')
+        
+        # Set timeout and retries from environment or default
+        self.request_timeout = int(os.getenv('COINGECKO_REQUEST_TIMEOUT', 10))
+        self.retries = int(os.getenv('COINGECKO_RETRIES', 3))
     
     def _validate_base_url(self, base_url: Optional[Union[str, int]]) -> str:
         """
         Validate and return a valid base URL.
-        
+
         Args:
             base_url: URL to validate
-        
+
         Returns:
             Validated base URL
-        
+
         Raises:
             ConfigurationError: If base URL is invalid
         """
@@ -86,20 +84,18 @@ class CoinGeckoConfig:
         if not base_url_str:
             raise ConfigurationError("Base URL must be a non-empty string")
         
-        # Protocol check
-        if not base_url_str.startswith(('http://', 'https://')):
-            raise ConfigurationError("Base URL must start with http:// or https://")
-        
         return base_url_str
     
-    def get_config(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """
-        Get a dictionary representation of the current configuration.
-        
+        Convert configuration to a dictionary.
+
         Returns:
-            Dict containing configuration parameters
+            Dictionary representation of configuration
         """
         return {
-            "api_key": self.api_key,
-            "base_url": self.base_url
+            'api_key': self.api_key,
+            'base_url': self.base_url,
+            'request_timeout': self.request_timeout,
+            'retries': self.retries
         }
