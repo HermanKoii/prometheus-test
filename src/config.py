@@ -11,16 +11,16 @@ class CoinGeckoConfig:
     Manages configuration for CoinGecko API integration.
     
     Supports configuration via:
-    1. Environment variables
-    2. .env file
-    3. Programmatic configuration
+    1. Programmatic configuration
+    2. Environment variables
+    3. Default configuration
     """
     
     DEFAULT_BASE_URL = 'https://api.coingecko.com/api/v3'
     
     def __init__(self, 
                  api_key: Optional[str] = None, 
-                 base_url: Union[str, None, int] = DEFAULT_BASE_URL,
+                 base_url: Optional[str] = None,
                  env_file: Optional[str] = None):
         """
         Initialize CoinGecko configuration.
@@ -33,9 +33,19 @@ class CoinGeckoConfig:
         # Load environment variables from .env file if specified or default
         load_dotenv(dotenv_path=env_file or '.env')
         
-        # Validate base_url explicitly
-        base_url = base_url or os.getenv('COINGECKO_BASE_URL') or self.DEFAULT_BASE_URL
-        self.base_url = self._validate_base_url(base_url)
+        # Prioritize configuration order:
+        # 1. Programmatically provided base_url 
+        # 2. Environment variable 
+        # 3. Default base URL
+        env_base_url = os.getenv('COINGECKO_BASE_URL')
+        
+        # Choose base_url
+        if base_url is not None:
+            self.base_url = self._validate_base_url(base_url)
+        elif env_base_url is not None:
+            self.base_url = self._validate_base_url(env_base_url)
+        else:
+            self.base_url = self.DEFAULT_BASE_URL
         
         # Prioritize method order: 
         # 1. Programmatic configuration 
