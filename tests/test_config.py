@@ -57,4 +57,8 @@ def test_configuration_validation():
     """Test configuration validation."""
     with pytest.raises(ValueError, match='base URL is required'):
         # Forcing empty base URL should raise an error
+        CoinGeckoConfig(base_url='   ', env_file=None)
+    
+    with pytest.raises(ValueError, match='base URL is required'):
+        # Forcing empty base URL should raise an error
         CoinGeckoConfig(base_url='', env_file=None)
