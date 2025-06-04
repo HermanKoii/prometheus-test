@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 from dotenv import load_dotenv
 
 class ConfigurationError(Exception):
@@ -35,39 +35,37 @@ class CoinGeckoConfig:
         # 1. Programmatic configuration 
         # 2. Environment variables
         self.api_key = api_key or os.getenv('COINGECKO_API_KEY')
-        self.base_url = base_url or os.getenv('COINGECKO_BASE_URL', 'https://api.coingecko.com/api/v3')
         
-        # Validate configuration
-        self._validate_config()
+        # Use a specific method to validate base_url
+        self.base_url = self._validate_base_url(base_url or os.getenv('COINGECKO_BASE_URL', 'https://api.coingecko.com/api/v3'))
     
-    def _validate_config(self):
+    def _validate_base_url(self, base_url: Union[str, None, int]) -> str:
         """
-        Validate configuration parameters.
+        Validate and return a valid base URL.
+        
+        Args:
+            base_url: URL to validate
+        
+        Returns:
+            Validated base URL
         
         Raises:
-            ConfigurationError: If required parameters are missing or invalid
+            ConfigurationError: If base URL is invalid
         """
-        # Check base_url type
-        if not isinstance(self.base_url, str):
+        # First check type
+        if base_url is None or not isinstance(base_url, str):
             raise ConfigurationError("Base URL must be a non-empty string")
         
-        # Trim any whitespace
-        self.base_url = self.base_url.strip()
-        
-        # Check base_url emptiness
-        if not self.base_url:
+        # Then check content
+        base_url = base_url.strip()
+        if not base_url:
             raise ConfigurationError("Base URL must be a non-empty string")
         
-        # Check base_url protocol
-        if not self.base_url.startswith(('http://', 'https://')):
+        # Validate protocol
+        if not base_url.startswith(('http://', 'https://')):
             raise ConfigurationError("Base URL must start with http:// or https://")
         
-        # Optional API key validation
-        if self.api_key is not None:
-            if not isinstance(self.api_key, str):
-                raise ConfigurationError("API Key must be a string")
-            if len(self.api_key.strip()) == 0:
-                raise ConfigurationError("API Key cannot be an empty string")
+        return base_url
     
     def get_config(self) -> Dict[str, Any]:
         """
