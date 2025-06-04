@@ -1,6 +1,11 @@
 import os
+import sys
 import pytest
-from ..src.config import CoinGeckoConfig, ConfigurationError
+
+# Add the project root directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.config import CoinGeckoConfig, ConfigurationError
 
 def test_config_default_initialization():
     """Test default configuration initialization."""
