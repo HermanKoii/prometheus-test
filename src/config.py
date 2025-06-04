@@ -49,7 +49,7 @@ class CoinGeckoConfig:
         """
         errors = []
         
-        if not self.base_url:
+        if not self.base_url or not self.base_url.strip():
             errors.append("CoinGecko base URL is required")
         
         if errors:
