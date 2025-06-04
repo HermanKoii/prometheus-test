@@ -44,7 +44,11 @@ def test_config_get_config():
 
 def test_invalid_base_url():
     """Test invalid base URL raises configuration error."""
-    with pytest.raises(ConfigurationError):
+    with pytest.raises(ConfigurationError, match="Base URL must start with http:// or https://"):
+        CoinGeckoConfig(base_url='invalid_url')
+    
+    with pytest.raises(ConfigurationError, match="Base URL must be a non-empty string"):
         CoinGeckoConfig(base_url=None)
-    with pytest.raises(ConfigurationError):
+    
+    with pytest.raises(ConfigurationError, match="Base URL must be a non-empty string"):
         CoinGeckoConfig(base_url=123)  # Non-string base URL
