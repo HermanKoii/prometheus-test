@@ -33,19 +33,12 @@ class CoinGeckoConfig:
         # Load environment variables from .env file if specified or default
         load_dotenv(dotenv_path=env_file or '.env')
         
-        # Prioritize configuration order:
-        # 1. Programmatically provided base_url 
-        # 2. Environment variable 
-        # 3. Default base URL
-        env_base_url = os.getenv('COINGECKO_BASE_URL')
+        # Validate base_url first
+        if base_url is None:
+            base_url = os.getenv('COINGECKO_BASE_URL')
         
-        # Choose base_url
-        if base_url is not None:
-            self.base_url = self._validate_base_url(base_url)
-        elif env_base_url is not None:
-            self.base_url = self._validate_base_url(env_base_url)
-        else:
-            self.base_url = self.DEFAULT_BASE_URL
+        # Strict validation even for default URL
+        self.base_url = self._validate_base_url(base_url or self.DEFAULT_BASE_URL)
         
         # Prioritize method order: 
         # 1. Programmatic configuration 
