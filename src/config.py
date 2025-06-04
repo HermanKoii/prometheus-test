@@ -30,19 +30,19 @@ class CoinGeckoConfig:
             base_url: Optional base URL for API requests
             env_file: Optional path to .env file (defaults to .env in project root)
         """
+        # Always validate base_url input first
+        if base_url is None:
+            base_url = os.getenv('COINGECKO_BASE_URL')
+        
+        # Validate base_url, falling back to default if needed
+        try:
+            self.base_url = self._validate_base_url(base_url)
+        except ConfigurationError:
+            # If validation fails, use default URL
+            self.base_url = self._validate_base_url(self.DEFAULT_BASE_URL)
+        
         # Load environment variables from .env file if specified or default
         load_dotenv(dotenv_path=env_file or '.env')
-        
-        # Validate base_url
-        env_base_url = os.getenv('COINGECKO_BASE_URL')
-        
-        if base_url is None and env_base_url is None:
-            base_url = self.DEFAULT_BASE_URL
-        elif base_url is None:
-            base_url = env_base_url
-        
-        # Validate base_url
-        self.base_url = self._validate_base_url(base_url)
         
         # Prioritize method order: 
         # 1. Programmatic configuration 
