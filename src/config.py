@@ -49,16 +49,16 @@ class CoinGeckoConfig:
         """
         errors = []
         
-        if not self.base_url:
-            errors.append("Base URL is required")
+        # Strict base URL validation
+        if not self.base_url or not isinstance(self.base_url, str):
+            errors.append("Base URL must be a non-empty string")
+        elif not self.base_url.startswith(('http://', 'https://')):
+            errors.append("Base URL must start with http:// or https://")
         
         # Optional: Add more specific validation for base_url format
-        if not isinstance(self.base_url, str):
-            errors.append("Base URL must be a string")
-        
-        # API key is optional but can be validated if present
-        if self.api_key and not isinstance(self.api_key, str):
-            errors.append("API Key must be a string")
+        # Optionally validate the API key format if it's present
+        if self.api_key is not None and (not isinstance(self.api_key, str) or len(self.api_key.strip()) == 0):
+            errors.append("API Key must be a non-empty string")
         
         if errors:
             raise ConfigurationError("\n".join(errors))
