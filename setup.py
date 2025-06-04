@@ -1,17 +1,15 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="prometheus-test",
-    version="0.1.2",
-    description="Test framework for Prometheus tasks",
-    author="Laura Abro",
+    name='coingecko-api-client',
+    version='0.1.0',
     packages=find_packages(),
     install_requires=[
-        "requests>=2.25.0",
-        "python-dotenv>=0.19.0",
-        "pymongo>=4.0.0",
-        "PyYAML>=6.0.0",
-        "typing-extensions>=4.0.0",
+        'python-dotenv',
     ],
-    python_requires=">=3.8",
+    extras_require={
+        'dev': [
+            'pytest',
+        ],
+    },
 )
