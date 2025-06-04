@@ -48,6 +48,9 @@ def test_invalid_base_url():
         CoinGeckoConfig(base_url='invalid_url')
     
     with pytest.raises(ConfigurationError, match="Base URL must be a non-empty string"):
+        CoinGeckoConfig(base_url='')
+    
+    with pytest.raises(ConfigurationError, match="Base URL must be a non-empty string"):
         CoinGeckoConfig(base_url=None)
     
     with pytest.raises(ConfigurationError, match="Base URL must be a non-empty string"):
