@@ -33,17 +33,23 @@ class CoinGeckoConfig:
         # Load environment variables from .env file if specified or default
         load_dotenv(dotenv_path=env_file or '.env')
         
-        # Validate base_url, force raising error for None or invalid input
+        # Validate base_url
         if base_url is None:
-            base_url = os.getenv('COINGECKO_BASE_URL')
+            base_url = os.getenv('COINGECKO_BASE_URL', self.DEFAULT_BASE_URL)
         
-        # Validate base_url with explicit error handling
+        # Perform validation, with fallback to error
         try:
             self.base_url = self._validate_base_url(base_url)
         except ConfigurationError:
-            # If validation fails for programmatic or env input, 
-            # raise the original ConfigurationError
-            raise ConfigurationError("Base URL must be a non-empty string")
+            # For invalid inputs, raise specific error message
+            if base_url is None:
+                raise ConfigurationError("Base URL must be a non-empty string")
+            elif not isinstance(base_url, str):
+                raise ConfigurationError("Base URL must be a non-empty string")
+            elif not base_url.startswith(('http://', 'https://')):
+                raise ConfigurationError("Base URL must start with http:// or https://")
+            else:
+                raise ConfigurationError("Base URL must be a non-empty string")
         
         # Prioritize method order: 
         # 1. Programmatic configuration 
@@ -63,7 +69,7 @@ class CoinGeckoConfig:
         Raises:
             ConfigurationError: If base URL is invalid
         """
-        # Validate input type first
+        # Explicit type and None check
         if base_url is None:
             raise ConfigurationError("Base URL must be a non-empty string")
         
