@@ -47,21 +47,27 @@ class CoinGeckoConfig:
         Raises:
             ConfigurationError: If required parameters are missing or invalid
         """
-        errors = []
+        # Check base_url type
+        if not isinstance(self.base_url, str):
+            raise ConfigurationError("Base URL must be a non-empty string")
         
-        # Strict base URL validation
-        if not self.base_url or not isinstance(self.base_url, str):
-            errors.append("Base URL must be a non-empty string")
-        elif not self.base_url.startswith(('http://', 'https://')):
-            errors.append("Base URL must start with http:// or https://")
+        # Trim any whitespace
+        self.base_url = self.base_url.strip()
         
-        # Optional: Add more specific validation for base_url format
-        # Optionally validate the API key format if it's present
-        if self.api_key is not None and (not isinstance(self.api_key, str) or len(self.api_key.strip()) == 0):
-            errors.append("API Key must be a non-empty string")
+        # Check base_url emptiness
+        if not self.base_url:
+            raise ConfigurationError("Base URL must be a non-empty string")
         
-        if errors:
-            raise ConfigurationError("\n".join(errors))
+        # Check base_url protocol
+        if not self.base_url.startswith(('http://', 'https://')):
+            raise ConfigurationError("Base URL must start with http:// or https://")
+        
+        # Optional API key validation
+        if self.api_key is not None:
+            if not isinstance(self.api_key, str):
+                raise ConfigurationError("API Key must be a string")
+            if len(self.api_key.strip()) == 0:
+                raise ConfigurationError("API Key cannot be an empty string")
     
     def get_config(self) -> Dict[str, Any]:
         """
