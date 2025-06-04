@@ -31,21 +31,19 @@ class CoinGeckoConfig:
         # Load environment variables from .env file if specified or default
         load_dotenv(dotenv_path=env_file or '.env')
         
+        # Validate base_url first
+        if base_url is None:
+            base_url = os.getenv('COINGECKO_BASE_URL', 'https://api.coingecko.com/api/v3')
+        
+        # Validate base_url
+        self.base_url = self._validate_base_url(base_url)
+        
         # Prioritize method order: 
         # 1. Programmatic configuration 
         # 2. Environment variables
         self.api_key = api_key or os.getenv('COINGECKO_API_KEY')
-        
-        # Prioritize and validate base_url
-        env_base_url = os.getenv('COINGECKO_BASE_URL')
-        if base_url is not None:
-            self.base_url = self._validate_base_url(base_url)
-        elif env_base_url is not None:
-            self.base_url = self._validate_base_url(env_base_url)
-        else:
-            self.base_url = 'https://api.coingecko.com/api/v3'
     
-    def _validate_base_url(self, base_url: Optional[Union[str, int]]) -> str:
+    def _validate_base_url(self, base_url: Union[str, int, None]) -> str:
         """
         Validate and return a valid base URL.
         
