@@ -20,7 +20,7 @@ class CoinGeckoConfig:
     
     def __init__(self, 
                  api_key: Optional[str] = None, 
-                 base_url: Optional[str] = DEFAULT_BASE_URL,
+                 base_url: Optional[str] = None,
                  env_file: Optional[str] = None):
         """
         Initialize CoinGecko configuration.
@@ -34,12 +34,12 @@ class CoinGeckoConfig:
         load_dotenv(dotenv_path=env_file or '.env')
         
         # Validate base_url
-        if base_url is None:
-            raise ConfigurationError("Base URL must be a non-empty string")
+        env_base_url = os.getenv('COINGECKO_BASE_URL')
         
-        # Try environment variable if no explicit base_url is provided
-        if base_url == self.DEFAULT_BASE_URL:
-            base_url = os.getenv('COINGECKO_BASE_URL', self.DEFAULT_BASE_URL)
+        if base_url is None and env_base_url is None:
+            base_url = self.DEFAULT_BASE_URL
+        elif base_url is None:
+            base_url = env_base_url
         
         # Validate base_url
         self.base_url = self._validate_base_url(base_url)
@@ -62,15 +62,18 @@ class CoinGeckoConfig:
         Raises:
             ConfigurationError: If base URL is invalid
         """
-        # Explicit type and None check
+        # Validate input type first
         if base_url is None:
             raise ConfigurationError("Base URL must be a non-empty string")
         
-        # Convert to string and strip
+        # Convert to string
         try:
-            base_url_str = str(base_url).strip()
+            base_url_str = str(base_url)
         except Exception:
             raise ConfigurationError("Base URL must be a non-empty string")
+        
+        # Strip whitespace
+        base_url_str = base_url_str.strip()
         
         # Empty string check
         if not base_url_str:
